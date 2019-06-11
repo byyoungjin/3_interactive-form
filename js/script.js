@@ -229,7 +229,7 @@ function errorMessageShowHide(isValidInput, inputElement, errorMessage){
   }
 
 
-
+//function for EventHandler(input)
 function inputValidateEventHandler(e) {
   const inputElement =$(e.target)
   const inputId = inputElement.attr('id');
@@ -237,7 +237,7 @@ function inputValidateEventHandler(e) {
   const isValidInput = inputValidate(inputId, regExForId_inRealTime);
   errorMessageShowHide(isValidInput, inputElement, errorMessage);
 }
-
+//function for EventHandler(actifities field)
 function activitiesValidateEventHandler(){
   const isValidActivities = validateActivities();
   const activitiesElement =$('div#activities');
