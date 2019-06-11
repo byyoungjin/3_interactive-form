@@ -162,8 +162,8 @@ button:hover {
   margin-top: 1.75em;
 }
 .error-message{
-
   position:relative;
+  display: none;
 
 }
 .error-message span{

@@ -197,31 +197,38 @@ function validateActivities(){
 
 //Function for show Error message next to the target element
 function showErrorMessage(element, message){
-  if(element.next('.error-message').text()){
-    element.next('.error-message').show()
-  } else {
+  const currentErrorMessage = element.next().text();
+  if(!(message === currentErrorMessage)){
     element.after(`<div class ='error-message'><span>${message}</span></div>`)
+    $('.error-message').fadeIn(300);
   }
 }
 
 //Function for hide Error message
-function hideErrorMessage(element){
-  if(element.next('.error-message').text()){
+function hideErrorMessage(element, message){
+  const currentErrorMessage = element.next().text();
+  if(!(message === currentErrorMessage)){
     element.next('.error-message').remove()
   }
 }
 
 //showErrorMessage + hideErrorMessage use function
 function errorMessageShowHide(isValidInput, inputElement, errorMessage){
-  hideErrorMessage(inputElement);//initialize
-  if(!isValidInput){
-    if(inputElement.val() ==='') {
-      showErrorMessage(inputElement, "It's empty!")//If input val() is '' then print out "it's empty!" rather than default message saved on 'errorMessageForId' object
-    } else {
-    showErrorMessage(inputElement, errorMessage)
+  let message = errorMessage;
+  if(inputElement.attr('type')==="text"){
+    if(inputElement.val() ===''){
+      message="It's empty!"//If input val() is '' then print out "it's empty!" rather than default message saved on 'errorMessageForId' object
     }
   }
-}
+  hideErrorMessage(inputElement, message);//initialize
+  if(!isValidInput){
+    showErrorMessage(inputElement, message)
+  } else {
+    inputElement.next('.error-message').remove();
+  }
+  }
+
+
 
 function inputValidateEventHandler(e) {
   const inputElement =$(e.target)
@@ -284,6 +291,10 @@ $('input[type="text"]').focus((e)=>{
 $('input[type="text"]').focusout((e)=>{
   hideErrorMessage($(e.target));
 });
+
+$('input[id="mail"]').focusout((e)=>{
+  inputValidate("mail", regExForId);
+})
 
 //Eventhandler for hover
 $('div#activities').hover(()=>{
