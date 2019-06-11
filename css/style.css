@@ -121,6 +121,8 @@ button:hover {
 .container {
 	margin: auto;
 	max-width: 680px;
+  position: relative;
+  z-index: 0;
 }
 
 .shirt div {
@@ -160,20 +162,25 @@ button:hover {
   margin-top: 1.75em;
 }
 .error-message{
-  border-radius: 5px;
-  display: block;
-  font-size: 1.3em;
-  text-align: center;
+
+  position:relative;
+
+}
+.error-message span{
   position: absolute;
-  background: #2F558E;
+  width: 150px;
+  margin-right: 10px;
+  z-index: 1;
+  padding: 10px;
+  border-radius: 10%;
+  background-color: rgba(0,100,100,80%);
+  border: solid 5px rgba(0,100,100,100%);
+  color: black;
+  text-align: center;
+  top: -100px;
+  left: 100px;
 
-  padding: 7px 10px;
-  color: #fff;
 }
-.relative {
-  position: relative;
-}
-
 #colors-js-puns {
   display: none;
 }

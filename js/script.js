@@ -136,32 +136,53 @@ function selectPayment(){
 $('select#payment').change(selectPayment());
 $('select#payment').ready(selectPayment());
 
-//Form Validation
 
-function validateName(){
-  const nameInput = $('input#name');
-  const isValidName = /.+/.test(nameInput.val());
-  if(isValidName){
-    nameInput.removeClass('error');
+
+
+/**
+ * Form Validation part
+ *
+ */
+
+const regExForId ={
+  name:/.+/,
+  mail:/^[^@]+@[^@.]+\.\w+$/,
+  cc_num:/^\d{13,16}$/,
+  zip:/^\d{5}$/,
+  cvv:/^\d{3}$/
+}
+// changed mail regEx for 'real' real check
+const regExForId_inRealTime = {
+  name:/.+/,
+  mail:/^[^@]+(@([^@.]+(\.(\w+)?)?)?)?$/, //justChanged(No error message if it's going alright)
+  cc_num:/^\d{13,16}$/,
+  zip:/^\d{5}$/,
+  cvv:/^\d{3}$/
+}
+
+//errorMessage for error
+const errorMessageForId ={
+  name:"Name field can't be blank.",
+  mail:"Email field must be a validly formatted e-mail address.",
+  cc_num:"Credit Card field should only accept a number between 13 and 16 digits.",
+  zip:"Zip Code field should be a 5-digit number.",
+  cvv:"CVV should only be a number that is exactly 3 digits long."
+}
+
+//This validate 5 inputField(name, mail, cc-num, zip, cvv)
+function inputValidate(inputId, regExForId){
+  const inputElement = $(`input#${inputId}`);
+  const isValidInput = regExForId[inputId].test(inputElement.val());
+  if(isValidInput){
+    inputElement.removeClass('error');
     return true;
   } else {
-    nameInput.addClass('error');
+    inputElement.addClass('error');
     return false;
   }
 }
 
-function validateEmail(){
-  const emailInput = $('input#mail');
-  const isValidEmail = /^[^@]+@[^@.]+\.\w+$/.test(emailInput.val());
-  if(isValidEmail){
-    emailInput.removeClass('error');
-    return true;
-  } else {
-    emailInput.addClass('error');
-    return false;
-  }
-}
-
+//This validate whether user selected at least 1 checkbox on activities
 function validateActivities(){
   const checkboxes = $('.activities input[type="checkbox"]');
   const ischecked = checkboxes.is(":checked");
@@ -174,119 +195,109 @@ function validateActivities(){
   }
 }
 
-function validateCreditCard(){
-  const paymentValue = $('select#payment').val();
-  if(paymentValue ==='credit-card'){
-    const validateObj =[
-      creditCard={
-        selector:'#cc-num',
-        regEx:/^\d{13,16}$/,
-      },
-      zip={
-        selector:'#zip',
-        regEx:/^\d{5}$/
-      },
-      cvv={
-        selector:'#cvv',
-        regEx:/^\d{3}$/
-      }
-    ]
-    function validateCardInfo(obj){
-      let boolean = true;
-      obj.forEach((o)=>{
-        const inputElement = $(o.selector);
-        const isValidateInput = o.regEx.test(inputElement.val());
-        if(isValidateInput){
-          inputElement.removeClass('error');
-          boolean *= true;
-        } else {
-          inputElement.addClass('error');
-          boolean *= false;
-        }
-      });
-      return boolean;
-    }
-    return validateCardInfo(validateObj);
-  } else{
-    return true;
+//Function for show Error message next to the target element
+function showErrorMessage(element, message){
+  if(element.next('.error-message').text()){
+    element.next('.error-message').show()
+  } else {
+    element.after(`<div class ='error-message'><span>${message}</span></div>`)
   }
 }
-function addErrorLabel(){
-  const arrayOfElement = [
-    name={
-      element:$('input#name'),
-      message:"<label class='error-message'>Name field can't be blank.</label>"
-    },
-    email={
-      element:$('input#mail'),
-      message:"<label class='error-message'>Email field must be a validly formatted e-mail address.</label>"
-    },
-    activities={
-      element:$('div#activities'),
-      message:"<label class='error-message'>You must select at least one checkbox.</label>"
-    },
-    cc_num={
-      element:$('input#cc-num'),
-      message:"<label class='error-message'>Credit Card field should only accept a number between 13 and 16 digits.</label>",
-      emptyMessage:"<label class='error-message'>It's Empty</label>"
-    },
-    zip={
-      element:$('input#zip'),
-      message:"<label class='error-message'>Zip Code field should be a 5-digit number.</label>",
-      emptyMessage:"<label class='error-message'>It's Empty</label>"
-    },
-    cvv={
-      element:$('input#cvv'),
-      message:"<label class='error-message'>CVV should only be a number that is exactly 3 digits long.</label>",
-      emptyMessage:"<label class='error-message'>It's Empty</label>"
-    }
-  ]
-  arrayOfElement.forEach((ele)=>{
-    if(ele.element.hasClass('error')){
-      //Put some Empty message on Credit card information
-      if(ele === cc_num || ele === zip || ele === cvv) {
-        if(ele.element.val()){
-          ele.element.after(ele.message);
-        } else {
-          ele.element.after(ele.emptyMessage);
-        }
-      } else {
-        ele.element.after(ele.message);
-      }
-      ele.element.next().hide();
-      // ele.element.hover((e)=>{
-      //   ele.element.next('label.error-message').show();
-      // },(e)=>{
-      //   ele.element.next('label.error-message').hide();
-      // });
-      ele.element.focus((e)=>{
-        ele.element.next('label.error-message').show();
-      });
-      ele.element.keyup((e)=>{
-        ele.element.next('label.error-message').hide();
-      });
-      ele.element.focusout((e)=>{
-        ele.element.next('label.error-message').hide();
-      });
-    } else {
-      if(ele.element.siblings('label.error-message').text()){
-        ele.element.siblings('label.error-message').remove()
-      }
-    }
-  });
 
+//Function for hide Error message
+function hideErrorMessage(element){
+  if(element.next('.error-message').text()){
+    element.next('.error-message').remove()
+  }
 }
+
+//showErrorMessage + hideErrorMessage use function
+function errorMessageShowHide(isValidInput, inputElement, errorMessage){
+  hideErrorMessage(inputElement);//initialize
+  if(!isValidInput){
+    if(inputElement.val() ==='') {
+      showErrorMessage(inputElement, "It's empty!")//If input val() is '' then print out "it's empty!" rather than default message saved on 'errorMessageForId' object
+    } else {
+    showErrorMessage(inputElement, errorMessage)
+    }
+  }
+}
+
+
+/**
+ * Form Validation Event handler part
+ *
+ */
+//Eventhandler for submit Event
 $('form[method]').submit(function(e){
-  if(!(validateEmail()*validateName()*validateActivities()*validateCreditCard())){
+  let validateAllInput =1;
+  //validate all input (5 input)
+  for(let id in regExForId){
+    validateAllInput *= inputValidate(id,regExForId);
+  }
+  //validate activities field
+  const isValidActivities = validateActivities()
+  if(!(validateAllInput*isValidActivities)){
     e.preventDefault();
-    addErrorLabel();
+    const keyArray = Object.keys(regExForId);
+    for(let i =0; i<keyArray.length; i++){
+      const inputElement = $(`input#${keyArray[i]}`);
+      const inputId = inputElement.attr('id');
+      const errorMessage = errorMessageForId[inputId];
+      const isValidInput = inputValidate(inputId, regExForId);
+      errorMessageShowHide(isValidInput, inputElement, errorMessage);
+    }
+    if(isValidActivities){
+      hideErrorMessage($('div#activities'));
+    } else {
+      showErrorMessage($('div#activities'), "You must select at least one checkbox.")
+    }
+
   }
 });
 
-$('input').keyup(function(e){
-  console.log('keyup event has occured!');
-  if(!(validateEmail()*validateName()*validateActivities()*validateCreditCard())){
-    e.preventDefault();
-    addErrorLabel();
+//Eventhandler for keyup
+$('input[type="text"]').keyup((e)=>{
+  const inputElement =$(e.target)
+  const inputId = inputElement.attr('id');
+  const errorMessage = errorMessageForId[inputId];
+  const isValidInput = inputValidate(inputId, regExForId_inRealTime);
+  errorMessageShowHide(isValidInput, inputElement, errorMessage);
+});
+
+//Eventhandler for focus
+$('input[type="text"]').focus((e)=>{
+  const inputElement =$(e.target)
+  const inputId = inputElement.attr('id');
+  const errorMessage = errorMessageForId[inputId];
+  const isValidInput = inputValidate(inputId, regExForId_inRealTime);
+  errorMessageShowHide(isValidInput, inputElement, errorMessage);
+});
+
+//Eventhandler for focusout
+$('input[type="text"]').focusout((e)=>{
+  hideErrorMessage($(e.target));
+});
+
+//Eventhandler for hover
+$('div#activities').hover((e)=>{
+  const isValid = validateActivities();
+  if(isValid){
+    hideErrorMessage($('div#activities'));
+  } else {
+    showErrorMessage($('div#activities'), "You must select at least one checkbox.")
+  }
+},
+(e)=> {
+  hideErrorMessage($('div#activities'));
+});
+
+//Eventhandler for click
+$('input[type="checkbox"]').click((e)=>{
+  const isValid = validateActivities();
+  if(isValid){
+    hideErrorMessage($('div#activities'));
+  } else {
+    showErrorMessage($('div#activities'), "You must select at least one checkbox.")
   }
 });
