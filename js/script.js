@@ -223,6 +223,21 @@ function errorMessageShowHide(isValidInput, inputElement, errorMessage){
   }
 }
 
+function inputValidateEventHandler(e) {
+  const inputElement =$(e.target)
+  const inputId = inputElement.attr('id');
+  const errorMessage = errorMessageForId[inputId];
+  const isValidInput = inputValidate(inputId, regExForId_inRealTime);
+  errorMessageShowHide(isValidInput, inputElement, errorMessage);
+}
+
+function activitiesValidateEventHandler(){
+  const isValidActivities = validateActivities();
+  const activitiesElement =$('div#activities');
+  const activitiesErrorMessage = "You must select at least one checkbox.";
+  errorMessageShowHide(isValidActivities, activitiesElement, activitiesErrorMessage );
+}
+
 
 /**
  * Form Validation Event handler part
@@ -239,6 +254,7 @@ $('form[method]').submit(function(e){
   const isValidActivities = validateActivities()
   if(!(validateAllInput*isValidActivities)){
     e.preventDefault();
+    //Validate and show errormessage inputFieldes(5 input)
     const keyArray = Object.keys(regExForId);
     for(let i =0; i<keyArray.length; i++){
       const inputElement = $(`input#${keyArray[i]}`);
@@ -247,31 +263,21 @@ $('form[method]').submit(function(e){
       const isValidInput = inputValidate(inputId, regExForId);
       errorMessageShowHide(isValidInput, inputElement, errorMessage);
     }
-    if(isValidActivities){
-      hideErrorMessage($('div#activities'));
-    } else {
-      showErrorMessage($('div#activities'), "You must select at least one checkbox.")
-    }
-
+    //Validate and show errormessage activities field
+    const activitiesElement =$('div#activities');
+    const activitiesErrorMessage = "You must select at least one checkbox.";
+    errorMessageShowHide(isValidActivities, activitiesElement, activitiesErrorMessage );
   }
 });
 
 //Eventhandler for keyup
 $('input[type="text"]').keyup((e)=>{
-  const inputElement =$(e.target)
-  const inputId = inputElement.attr('id');
-  const errorMessage = errorMessageForId[inputId];
-  const isValidInput = inputValidate(inputId, regExForId_inRealTime);
-  errorMessageShowHide(isValidInput, inputElement, errorMessage);
+  inputValidateEventHandler(e);
 });
 
 //Eventhandler for focus
 $('input[type="text"]').focus((e)=>{
-  const inputElement =$(e.target)
-  const inputId = inputElement.attr('id');
-  const errorMessage = errorMessageForId[inputId];
-  const isValidInput = inputValidate(inputId, regExForId_inRealTime);
-  errorMessageShowHide(isValidInput, inputElement, errorMessage);
+  inputValidateEventHandler(e);
 });
 
 //Eventhandler for focusout
@@ -280,24 +286,14 @@ $('input[type="text"]').focusout((e)=>{
 });
 
 //Eventhandler for hover
-$('div#activities').hover((e)=>{
-  const isValid = validateActivities();
-  if(isValid){
-    hideErrorMessage($('div#activities'));
-  } else {
-    showErrorMessage($('div#activities'), "You must select at least one checkbox.")
-  }
+$('div#activities').hover(()=>{
+  activitiesValidateEventHandler();
 },
-(e)=> {
+()=> {
   hideErrorMessage($('div#activities'));
 });
 
 //Eventhandler for click
-$('input[type="checkbox"]').click((e)=>{
-  const isValid = validateActivities();
-  if(isValid){
-    hideErrorMessage($('div#activities'));
-  } else {
-    showErrorMessage($('div#activities'), "You must select at least one checkbox.")
-  }
+$('input[type="checkbox"]').click(()=>{
+  activitiesValidateEventHandler();
 });
