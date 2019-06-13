@@ -133,8 +133,8 @@ function selectPayment(){
   hideShowPayment(selectedPay);
 
 }
-$('select#payment').change(selectPayment());
-$('select#payment').ready(selectPayment());
+$('select#payment').change(selectPayment);
+$('select#payment').ready(selectPayment);
 
 
 
@@ -253,8 +253,17 @@ function activitiesValidateEventHandler(){
 //Eventhandler for submit Event
 $('form[method]').submit(function(e){
   let validateAllInput =1;
+  let regExArray;
+  if($('select#payment').val() === "credit-card"){
+    regExArray= regExForId
+  } else {
+    regExArray ={
+      name:/.+/,
+      mail:/^[^@]+@[^@.]+\.\w+$/,
+    }
+  }
   //validate all input (5 input)
-  for(let id in regExForId){
+  for(let id in regExArray){
     validateAllInput *= inputValidate(id,regExForId);
   }
   //validate activities field
